@@ -1,0 +1,11 @@
+version: "3"
+services:
+  origin:
+    # build: ./docker/origin
+    image: docker.io/unifiedstreaming/vod2live:1.11.3
+    ports:
+      - 80:80
+    environment: 
+      - UspLicenseKey
+    volumes:
+      - ./smils:/var/www/unified-origin/smils

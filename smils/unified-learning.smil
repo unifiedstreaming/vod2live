@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smil xmlns="http://www.w3.org/2001/SMIL20/Language">
+  <head/>
+  <body>
+    <seq>
+      <video src="https://usp-vod2live.s3.dualstack.eu-central-1.amazonaws.com/Promo_Learning-ad-dref.mp4"/>
+    </seq>
+  </body>
+</smil>
+
