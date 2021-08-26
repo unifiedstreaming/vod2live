@@ -17,7 +17,7 @@ Start with ``docker-compose up -d``.
 
 View logs with ``docker-compose logs``.
 
-Access demo page at http://<address>/. By default this will start playing the
+Access demo page at ``http://<address>/``. By default this will start playing the
 ``smils/unified-learning.smil`` channel.
 
 If you want a different playlist to be used, you can change this in
