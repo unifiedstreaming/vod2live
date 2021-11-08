@@ -5,13 +5,17 @@ creating a VOD2Live .isml for streaming.
 
 ## Repo structure
 The repository should contain at least:
-* docker/ directory with a subdirectory for each Docker image being built
-* smils/ directory containing SMIL file(s) which will be turned in to VOD2Live channels
-* docker-compose.yaml
-* README.md explaining how to use the project
+* ``docker/`` directory with a subdirectory for each Docker image being built
+* ``smils/`` directory containing SMIL file(s) which will be turned in to VOD2Live channels
+* ``docker-compose.yaml``
+* ``README.md`` explaining how to use the project
 
 ## Usage
 Add, or edit, SMIL files in ``smils/`` directory.
+
+Set your license key (must include Remix and VOD2Live functionality) with
+``export UspLicenseKey=<KEY>``. If you don't already have a license but want
+to evaluate Remix VOD2Live, please contact sales@unified-streaming.com.
 
 Start with ``docker-compose up -d``.
 

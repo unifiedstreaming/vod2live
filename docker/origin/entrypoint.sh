@@ -12,52 +12,52 @@ if [ -z "$LOG_FORMAT" ]
   export LOG_FORMAT="%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\" %D"
 fi
 
-# validate required variables are set
-if [ -z "$UspLicenseKey" ]
-  then
-  echo >&2 "Error: UspLicenseKey environment variable is required but not set."
-  exit 1
-fi
-
 if [ -z "$REMOTE_PATH" ]
   then
   export REMOTE_PATH=remote
 fi
 
-# update configuration based on env vars
-# log levels
-/bin/sed "s@{{LOG_LEVEL}}@${LOG_LEVEL}@g; s@{{LOG_FORMAT}}@'${LOG_FORMAT}'@g;" /etc/apache2/conf.d/unified-origin.conf.in > /etc/apache2/conf.d/unified-origin.conf
+# validate required variables are set
+if [ -z "$UspLicenseKey" ] && [ -z "$USP_LICENSE_KEY" ]
+  then
+  echo >&2 "Error: UspLicenseKey environment variable is required but not set."
+  exit 1
+elif [ -z "$UspLicenseKey" ]
+  then
+  export UspLicenseKey=$USP_LICENSE_KEY
+fi
 
 # set up remote storage proxy config
-if [ $S3_ACCESS_KEY ]
+if [ "$S3_ACCESS_KEY" ]
 then
-  REMIX_S3_ACCESS_KEY="--s3_access_key=${S3_ACCESS_KEY}"
-  S3_ACCESS_KEY="S3AccessKey ${S3_ACCESS_KEY}"
+  export EXTRA_OPTIONS="$EXTRA_OPTIONS -D S3_ACCESS_KEY"
+  export REMIX_S3_ACCESS_KEY="--s3_access_key=${S3_ACCESS_KEY}"
 fi
-if [ $S3_SECRET_KEY ]
+if [ "$S3_SECRET_KEY" ]
 then
-  REMIX_S3_SECRET_KEY="--s3_secret_key=${S3_SECRET_KEY}"
-  S3_SECRET_KEY="S3SecretKey ${S3_SECRET_KEY}"
+  export EXTRA_OPTIONS="$EXTRA_OPTIONS -D S3_SECRET_KEY"
+  export REMIX_S3_SECRET_KEY="--s3_secret_key=${S3_SECRET_KEY}"
 fi
-if [ $S3_REGION ]
+if [ "$S3_REGION" ]
 then
-  REMIX_S3_REGION="--s3_region=${S3_REGION}"
-  S3_REGION="S3Region ${S3_REGION}"
+  export EXTRA_OPTIONS="$EXTRA_OPTIONS -D S3_REGION"
+  export REMIX_S3_REGION="--s3_region=${S3_REGION}"
+fi
+
+# remote storage
+if [ "$REMOTE_STORAGE_URL" ]
+  then
+  export EXTRA_OPTIONS="$EXTRA_OPTIONS -D REMOTE_STORAGE_URL"
 fi
 
 REMIX_OPTS="${REMIX_S3_ACCESS_KEY} ${REMIX_S3_SECRET_KEY} ${REMIX_S3_REGION}"
 
-# remote storage
-if [ $REMOTE_STORAGE_URL ]
-  then
-  /bin/sed "s@{{REMOTE_PATH}}@${REMOTE_PATH}@g; s@{{REMOTE_STORAGE_URL}}@${REMOTE_STORAGE_URL}@g; s@{{S3_ACCESS_KEY}}@${S3_ACCESS_KEY}@g; s@{{S3_SECRET_KEY}}@${S3_SECRET_KEY}@g; s@{{S3_REGION}}@${S3_REGION}@g" /etc/apache2/conf.d/remote_storage.conf.in > /etc/apache2/conf.d/remote_storage.conf
-fi
-
+# change Listen 80 to Listen 0.0.0.0:80 to avoid some strange issues when IPv6 is available
+/bin/sed -i "s@Listen 80@Listen 0.0.0.0:80@g" /etc/apache2/httpd.conf
 
 # USP license
-echo $UspLicenseKey > /etc/usp-license.key
+echo "$UspLicenseKey" > /etc/usp-license.key
 
-# nuke apache pidfile just in case this is an existing container that was improperly stopped and restarted
 rm -f /run/apache2/httpd.pid
 
 # first arg is `-f` or `--some-option`
@@ -78,7 +78,7 @@ if [ "${1#-}" != "$1" ]; then
       ${MP4SPLIT_OPTS} \
       ${target}.mp4
   done
-  set -- httpd "$@"
+  set -- httpd $EXTRA_OPTIONS "$@"
 fi
 
 exec "$@"
