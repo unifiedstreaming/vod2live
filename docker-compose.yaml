@@ -2,7 +2,7 @@ version: "3"
 services:
   origin:
     # build: ./docker/origin
-    image: docker.io/unifiedstreaming/vod2live:1.11.14
+    image: docker.io/unifiedstreaming/vod2live:1.11.17
     ports:
       - 80:80
     environment: 
